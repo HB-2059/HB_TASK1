@@ -1,0 +1,8 @@
+prefix=/home/atharva/catkin_ws/devel
+
+Name: hola_bot
+Description: Description of hola_bot
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

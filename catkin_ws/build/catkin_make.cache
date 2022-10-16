@@ -1,0 +1,2 @@
+eYRC-2022_HolA_Bot/eyrc-2022_holabot:hola_bot:robot_controller:turtle_d
+-DCATKIN_DEVEL_PREFIX=/home/atharva/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/atharva/catkin_ws/install -G Unix Makefiles
