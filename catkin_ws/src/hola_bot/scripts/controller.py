@@ -23,7 +23,8 @@ def odometryCb(msg):
 	hola_x=msg.pose.pose.position.x
 	hola_y=msg.pose.pose.position.y
 	hola_theta=msg.pose.pose.position.theta
-	
+	orientation_list = [hola_theta.x, hola_theta.y, hola_theta.z, hola_theta.w]
+	(roll,pitch,yaw) = euler_from_quaternion(orientation_list)
 	
 	
 	# Write your code to take the msg and update the three variables
@@ -36,21 +37,27 @@ def main():
     
 	pub = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 	sub = rospy.Subscriber('/odom',Odometry, odometryCb)
-	pose = Odometry() 
-	rate = rospy.Rate(10)
-	
+ 
 	
 		
-
 	# Declare a Twist message
 	vel = Twist()
+	rate = rospy.Rate(10)
+	
+
 	# Initialise the required variables to 0
 	# <This is explained below>
 	vel.linear.x=0
 	vel.linear.y=0
 	vel.angular.z=0
 	
-	
+	x_goals = [1, -1, -1, 1, 0]
+	y_goals = [1, 1, -1, -1, 0]
+	theta_goals =[ pi/4, 3*pi/4, -3*pi/4, -pi/4, 0]
+	goal = Point()
+	goal.x = 1
+	goal.y = 1
+
 	
 	# For maintaining control loop rate.
 	rate = rospy.Rate(100)
@@ -87,10 +94,18 @@ def main():
 		# for now since we are in a simulator and we are not dealing with actual physical limits on the system 
 		# we may get away with skipping this step. But it will be very necessary in the long run.
 
-		vel.linear.x = vel_x
-		vel.linear.y = vel_y
-		vel.angular.z = vel_z
+		inc_x = goal.x -hola_x
+		inc_y = goal.y -hola_y
 
+		angle_to_goal = math.atan2(inc_y, inc_x)
+
+		if abs(angle_to_goal - yaw) > 0.1:
+			vel.linear.x = 0.0
+			vel.angular.z = 0.3
+		else:
+			vel.linear.x = 0.5
+			vel.angular.z = 0.0
+		
 		pub.publish(vel)
 		rate.sleep()
 
