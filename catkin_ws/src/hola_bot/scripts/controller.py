@@ -17,14 +17,15 @@ hola_x = 0
 hola_y = 0
 hola_theta = 0
 
+pi = 3.1415926535897
 
 def odometryCb(msg):
 	global hola_x, hola_y, hola_theta
 	hola_x=msg.pose.pose.position.x
 	hola_y=msg.pose.pose.position.y
-	hola_theta=msg.pose.pose.position.theta
-	orientation_list = [hola_theta.x, hola_theta.y, hola_theta.z, hola_theta.w]
-	(roll,pitch,yaw) = euler_from_quaternion(orientation_list)
+	rot_q = msg.pose.pose.orientation
+	orientation_list = [rot_q.x, rot_q.y, rot_q.z, rot_q.w]
+	(roll,pitch,hola_theta) = euler_from_quaternion(orientation_list)
 	
 	
 	# Write your code to take the msg and update the three variables
@@ -99,7 +100,7 @@ def main():
 
 		angle_to_goal = math.atan2(inc_y, inc_x)
 
-		if abs(angle_to_goal - yaw) > 0.1:
+		if abs(angle_to_goal - hola_theta) > 0.1:
 			vel.linear.x = 0.0
 			vel.angular.z = 0.3
 		else:
