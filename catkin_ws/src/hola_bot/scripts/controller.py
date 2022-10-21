@@ -92,7 +92,7 @@ def main():
 	theta_goals =[ pi/4, 3*pi/4, -3*pi/4, -pi/4, 0]
 	def theta_convert():
 		for i in range(theta_goals):
-			if theta_goals[i]<0:
+			while theta_goals[i]<0:
 				theta_goals[i]=((2*pi)-theta_goals[i])
 			while theta_goals>2*pi:
 				theta_goals[i]-=2*pi
