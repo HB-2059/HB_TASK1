@@ -38,14 +38,14 @@ def euclediandistance(goal):
 	return (math.sqrt(pow((goal.x - hola_x), 2) + pow((goal.y - hola_y), 2)))
 
 def linearvel(goal):
-	return 1 * euclediandistance(goal)
+	return 0.5 * euclediandistance(goal)
 
 def steering(goal):
 	return math.atan2(goal.y - hola_y, goal.x - hola_x)
 
 
 def angularvel(goal):
-	return 2 * (steering(goal) - hola_theta)
+	return 1 * (steering(goal) - hola_theta)
 
 # def movetogoal(goal):
 		# inc_x = goal.x -hola_x
@@ -91,10 +91,10 @@ def main():
 	y_goals = [1, 1, -1, -1, 0]
 	theta_goals =[ pi/4, 3*pi/4, -3*pi/4, -pi/4, 0]
 	def theta_convert():
-		for i in range(theta_goals):
+		for i in range(len(theta_goals)):
 			while theta_goals[i]<0:
 				theta_goals[i]=((2*pi)-theta_goals[i])
-			while theta_goals>2*pi:
+			while theta_goals[i]>2*pi:
 				theta_goals[i]-=2*pi
 	theta_convert()
 
@@ -120,7 +120,7 @@ def main():
 		
 		while not abs(theta_var-hola_theta)<=0.04:
 			vel.linear.x=0
-			if theta_var<0:
+			if theta_var-hola_theta<0:
 				vel.angular.z=-1
 			else:
 				vel.angular.z=1
@@ -130,6 +130,7 @@ def main():
 		vel.linear.x=0
 		vel.angular.z=0
 		pub.publish(vel)
+		rate = rospy.Rate(100)
 		#end of control loop
 		
 		
