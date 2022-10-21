@@ -91,36 +91,39 @@ def main():
 	y_goals = [1, 1, -1, -1, 0]
 	theta_goals =[ pi/4, 3*pi/4, -3*pi/4, -pi/4, 0]
 	goal = Point()
-	goal.x = 1
-	goal.y = 1
+	# goal.x = 1
+	# goal.y = 1
 	
-	vel= Twist()
+	for i in range(len(x_goals)):
+		goal.x = x_goals[i]
+		goal.y = y_goals[i]
+		vel= Twist()
 
-	while euclediandistance(goal)>=0.02:
-		vel.linear.x=linearvel(goal)
-		vel.angular.z=angularvel(goal)
-		pub.publish(vel)
-		rate.sleep()
+		while euclediandistance(goal)>=0.02:
+			vel.linear.x=linearvel(goal)
+			vel.angular.z=angularvel(goal)
+			pub.publish(vel)
+			rate.sleep()
 
-	vel.linear.x=0
-	vel.angular.z=0
-	
-	while not abs(pi/4-hola_theta)<=0.04:
 		vel.linear.x=0
-		vel.angular.z=1
+		vel.angular.z=0
+		
+		while not abs(pi/4-hola_theta)<=0.04:
+			vel.linear.x=0
+			vel.angular.z=1
+			pub.publish(vel)
+			rate.sleep()
+
+		vel.linear.x=0
+		vel.angular.z=0
 		pub.publish(vel)
-		rate.sleep()
-
-
-
-	
-	vel.linear.x=0
-	vel.angular.z=0
-	pub.publish(vel)
+		
+		
+		# For maintaining control loop rate.
+		rate = rospy.Rate(100)
+		#increment goals
 	
 	
-	# For maintaining control loop rate.
-	rate = rospy.Rate(100)
 
 	# Initialise variables that may be needed for the control loop
 	# For ex: x_d, y_d, theta_d (in **meters** and **radians**) for defining desired goal-pose.
