@@ -90,6 +90,15 @@ def main():
 	x_goals = [1, -1, -1, 1, 0]
 	y_goals = [1, 1, -1, -1, 0]
 	theta_goals =[ pi/4, 3*pi/4, -3*pi/4, -pi/4, 0]
+	def theta_convert():
+		for i in range(theta_goals):
+			if theta_goals[i]<0:
+				theta_goals[i]=((2*pi)-theta_goals[i])
+			while theta_goals>2*pi:
+				theta_goals[i]-=2*pi
+	theta_convert()
+
+
 	goal = Point()
 	# goal.x = 1
 	# goal.y = 1
@@ -97,6 +106,7 @@ def main():
 	for i in range(len(x_goals)):
 		goal.x = x_goals[i]
 		goal.y = y_goals[i]
+		theta_var=theta_goals[i]
 		vel= Twist()
 
 		while euclediandistance(goal)>=0.02:
@@ -108,20 +118,25 @@ def main():
 		vel.linear.x=0
 		vel.angular.z=0
 		
-		while not abs(pi/4-hola_theta)<=0.04:
+		while not abs(theta_var-hola_theta)<=0.04:
 			vel.linear.x=0
-			vel.angular.z=1
+			if theta_var<0:
+				vel.angular.z=-1
+			else:
+				vel.angular.z=1
 			pub.publish(vel)
 			rate.sleep()
 
 		vel.linear.x=0
 		vel.angular.z=0
 		pub.publish(vel)
+		#end of control loop
 		
 		
-		# For maintaining control loop rate.
-		rate = rospy.Rate(100)
-		#increment goals
+		
+	
+	# For maintaining control loop rate.
+	rate = rospy.Rate(100)
 	
 	
 
