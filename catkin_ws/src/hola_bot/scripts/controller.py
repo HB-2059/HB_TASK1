@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+
 import rospy
 
 # publishing to /cmd_vel with msg type: Twist
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Point ,Twist
 # subscribing to /odom with msg type: Odometry
 from nav_msgs.msg import Odometry
 
@@ -21,44 +22,102 @@ pi = 3.1415926535897
 
 def odometryCb(msg):
 	global hola_x, hola_y, hola_theta
-	hola_x=msg.pose.pose.position.x
-	hola_y=msg.pose.pose.position.y
+	hola_x = msg.pose.pose.position.x
+	hola_y = msg.pose.pose.position.y
+
 	rot_q = msg.pose.pose.orientation
 	orientation_list = [rot_q.x, rot_q.y, rot_q.z, rot_q.w]
 	(roll,pitch,hola_theta) = euler_from_quaternion(orientation_list)
 	
 	
+	
+	
 	# Write your code to take the msg and update the three variables
 
+def euclediandistance(goal):
+	return (math.sqrt(pow((goal.x - hola_x), 2) + pow((goal.y - hola_y), 2)))
+
+def linearvel(goal):
+	return 1 * euclediandistance(goal)
+
+def steering(goal):
+	return math.atan2(goal.y - hola_y, goal.x - hola_x)
+
+
+def angularvel(goal):
+	return 2 * (steering(goal) - hola_theta)
+
+# def movetogoal(goal):
+		# inc_x = goal.x -hola_x
+		# inc_y = goal.y -hola_y
+
+	# vel= Twist()
+
+	# while euclediandistance(goal)>=0.1:
+	# 	vel.linear.x=linearvel(goal)
+	# 	vel.angular.z=angularvel(goal)
+
+		# angle_to_goal = math.atan2(inc_y, inc_x)
+
+		# if abs(angle_to_goal - hola_theta) > 0.1:
+		# 	vel.linear.x = 0.0
+		# 	vel.angular.z = 1
+		# else:
+		# 	vel.linear.x = 1
+		# 	vel.angular.z = 0.0
+
 def main():
-	rospy.init_node('controller', anonymous=True)
+	rospy.init_node('controller')
 	# Initialze Publisher and Subscriber
 	# We'll leave this for you to figure out the syntax for
 	# initialising publisher and subscriber of cmd_vel and odom respectively
     
 	pub = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
 	sub = rospy.Subscriber('/odom',Odometry, odometryCb)
- 
+	
 	
 		
 	# Declare a Twist message
 	vel = Twist()
-	rate = rospy.Rate(10)
-	
 
+	rate = rospy.Rate(10)
 	# Initialise the required variables to 0
 	# <This is explained below>
 	vel.linear.x=0
 	vel.linear.y=0
 	vel.angular.z=0
-	
+
 	x_goals = [1, -1, -1, 1, 0]
 	y_goals = [1, 1, -1, -1, 0]
 	theta_goals =[ pi/4, 3*pi/4, -3*pi/4, -pi/4, 0]
 	goal = Point()
 	goal.x = 1
 	goal.y = 1
+	
+	vel= Twist()
 
+	while euclediandistance(goal)>=0.02:
+		vel.linear.x=linearvel(goal)
+		vel.angular.z=angularvel(goal)
+		pub.publish(vel)
+		rate.sleep()
+
+	vel.linear.x=0
+	vel.angular.z=0
+	
+	while not abs(pi/4-hola_theta)<=0.04:
+		vel.linear.x=0
+		vel.angular.z=1
+		pub.publish(vel)
+		rate.sleep()
+
+
+
+	
+	vel.linear.x=0
+	vel.angular.z=0
+	pub.publish(vel)
+	
 	
 	# For maintaining control loop rate.
 	rate = rospy.Rate(100)
@@ -66,8 +125,8 @@ def main():
 	# Initialise variables that may be needed for the control loop
 	# For ex: x_d, y_d, theta_d (in **meters** and **radians**) for defining desired goal-pose.
 	# and also Kp values for the P Controller
-
 	#
+	# movetogoal(goal)
 	# 
 	# Control Loop goes here
 	#
@@ -94,19 +153,21 @@ def main():
 		# make sure the velocities are within a range.
 		# for now since we are in a simulator and we are not dealing with actual physical limits on the system 
 		# we may get away with skipping this step. But it will be very necessary in the long run.
+		 
+		# inc_x = goal.x -hola_x
+		# inc_y = goal.y -hola_y
 
-		inc_x = goal.x -hola_x
-		inc_y = goal.y -hola_y
+		# angle_to_goal = math.atan2(inc_y, inc_x)
 
-		angle_to_goal = math.atan2(inc_y, inc_x)
+		# if abs(angle_to_goal - hola_theta) > 0.1:
+		# 	vel.linear.x = 0.0
+		# 	vel.angular.z = 1
+		# else:
+		# 	vel.linear.x = 1
+		# 	vel.angular.z = 0.0
+		# movetogoal(goal)
 
-		if abs(angle_to_goal - hola_theta) > 0.1:
-			vel.linear.x = 0.0
-			vel.angular.z = 0.3
-		else:
-			vel.linear.x = 0.5
-			vel.angular.z = 0.0
-		
+
 		pub.publish(vel)
 		rate.sleep()
 
